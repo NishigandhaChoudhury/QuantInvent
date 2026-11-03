@@ -1,6 +1,10 @@
-import numpy as np, pandas as pd
+import json, numpy as np, pandas as pd
+import quantum.vqe as V
 from quantum.vqe import load_instance, energies, heuristic, ansatz, run_vqe, BASE
 from classical.repair import repair, local_search, to_idx, bits
+
+lam = json.load(open(BASE / "lambda.json"))
+V.LAM1, V.LAM2 = lam["l1"], lam["l2"]
 
 def score(d, x, act):
     n, T = d["mu"].shape; x = np.asarray(x).reshape(n, T)
@@ -12,7 +16,7 @@ def score(d, x, act):
     return c, ok / (n * T) * 100
 
 fc = pd.read_csv(BASE / "forecasts_cal.csv"); rows = []; SEEDS = 3
-for k in range(7):
+for k in range(3, 7):
     d = load_instance(k); n, T = d["mu"].shape; N = n * T
     f = fc[fc.instance == k]
     g = lambda c: np.stack([f[f.item_id == i].sort_values("h")[c].values for i in d["items"]])
@@ -29,7 +33,8 @@ for k in range(7):
         th_r = rng.uniform(0, 2 * np.pi, qc.num_parameters)
         th_w = rng.normal(0, 0.05, qc.num_parameters); th_w[:N] += np.pi * (0.1 + 0.8 * xh)
         _, pr = run_vqe(E, qc, th_r)
-        add("B2 VQE random", s, bits(int(rng.choice(len(E), 2048, p=pr)[np.argmin(E[rng.choice(len(E), 2048, p=pr)])]) if False else int(np.random.default_rng(s).choice(len(E), 2048, p=pr)[0]), N))
+        s0 = rng.choice(len(E), 2048, p=pr)
+        add("B2 VQE random", s, bits(int(s0[np.argmin(E[s0])]), N))
         _, pw = run_vqe(E, qc, th_w)
         smp = rng.choice(len(E), 2048, p=pw); top = np.unique(smp[np.argsort(E[smp])[:10]])
         cands = [local_search(E, repair(d, bits(int(i), N))) for i in top]
