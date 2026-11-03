@@ -1,0 +1,16 @@
+pandas
+numpy
+scikit-learn
+torch
+qiskit>=1.0
+qiskit-aer
+qiskit-algorithms
+ortools
+scikit-optimize
+mapie
+shap
+fastapi
+uvicorn
+jupyter
+kaggle
+matplotlib

@@ -1,0 +1,7 @@
+venv/
+__pycache__/
+node_modules/
+backend/data/
+*.csv
+.env
+.ipynb_checkpoints/
