@@ -38,6 +38,7 @@ for k in range(3, 7):
         _, pw = run_vqe(E, qc, th_w)
         smp = rng.choice(len(E), 2048, p=pw); top = np.unique(smp[np.argsort(E[smp])[:10]])
         cands = [local_search(E, repair(d, bits(int(i), N))) for i in top]
+        cands.append(local_search(E, repair(d, xh)))
         add("B4 proposed", s, min(cands, key=lambda c: E[to_idx(c)]))
     print("instance", k, "done")
 
